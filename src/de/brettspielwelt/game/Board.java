@@ -40,17 +40,23 @@ public class Board extends HTMLWrapper
 	
 	Image[] baseImg;
 	
+	// ------------------------- Init Stuff - Loading Strings for localization / Fonts / Images ---------------------
 	@Override
 	public void init(int lev, Runnable run) {
 		if(lev==0){
-			localInitH();
-			initPics();
-		}
-		if(lev==1){
+			localStrings = getStringsLocal("t", 1);
+			
+			registerFont("Calligraphic.ttf");
+			
 			fourFont = getFontLocal("fourFont", 1);
 			threeFont = getFontLocal("threeFont", 1);
 			fontDefault = getFontLocal("defaultFont", 1);
 			fontLarge = getFontLocal("largeFont", 1);
+			
+			initPics();
+		}
+		if(lev==1){
+			getSoundPack(null, new String[] { "star.wav"});
 		}
 	}
 	
@@ -63,26 +69,9 @@ public class Board extends HTMLWrapper
 		for(int i=0; i<imageNames.length; i++){
 			baseImg[i] = getImageLocal(imageNames[i]);
 		}
-		
-		registerFont("Calligraphic.ttf");
-				
-	}
-		
+	}	
 	
-	protected boolean localInitH(){
-		localStrings = getStringsLocal("t", 1);
-		
-		fourFont = getFontLocal("fourFont", 1);
-		threeFont = getFontLocal("threeFont", 1);
-		fontDefault = getFontLocal("defaultFont", 1);
-		fontLarge = getFontLocal("largeFont", 1);
-		
-		initPics();
-		
-		return getSoundPack(null, new String[] { "star.wav"});
-	}
-	
-	
+	// ---------------- Get the Data from the Informer into local variables ---------------
 	public void getBoard(Vect v){
 		if(v.size()>3) {
 			int c=0;
@@ -111,10 +100,11 @@ public class Board extends HTMLWrapper
 		if(anim==null || anim.length==0) return;
 	}
 	
+	// --------------- Update Loop Triggers every 40ms to have 25 frames/sec ----------------
 	public void run() {
 
-		if(history!=null && history.size()>0) {
-			getBoard((Vect)history.elementAt(0));
+		if(history!=null && history.size()>0) { 	// Check if we got new Data from the Informer
+			getBoard((Vect)history.elementAt(0));	// And work with it.
 			history.removeElementAt(0);
 			rep=true;
 		}
@@ -126,10 +116,12 @@ public class Board extends HTMLWrapper
 		
 	}
 	
+	// -------------- Receiving and Sending Data to and from the Server -----------
+	
 	public void getNioData(int typ, Data dat){
 		int c=0;
 		
-		switch(typ){
+		switch(typ){	// Put received data from the Server in a queue (history)
 		case 700:
 			history.addElement(dat.v);
 			break;
@@ -162,6 +154,8 @@ public class Board extends HTMLWrapper
 		sendDataObject(dat);
 	}
 	
+	// --------------- Mouse / Touch Actions ------------------
+	
 	@Override
 	public void mouseMoved(MouseEvent ev) {
 		int x = ev.getX();
@@ -169,10 +163,6 @@ public class Board extends HTMLWrapper
 		mouseMoveX=x; mouseMoveY=y;
 		
 		ev.consume();
-	}
-	
-	public boolean immediateDrag(){
-		return true;
 	}
 	
 	public void mouseReleased(MouseEvent ev) {
@@ -198,20 +188,11 @@ public class Board extends HTMLWrapper
 		repaint();
 	}
 	
-	
-	Graphics2D backG;
-	
-	public int drawImage(Graphics2D g, Image img, int x, int y, int w) {
-		int hi=w*img.getHeight(null)/img.getWidth(null);
-		double sc=(double)w/(double)img.getWidth(null);
-		save(g);
-		g.translate(x, y);
-		g.scale(sc,sc);
-		g.drawImage(img, 0, 0,null);
-		restore(g);
-		return hi;
+	public boolean immediateDrag(){
+		return true;
 	}
-	
+
+	// ----------------- Drawing the Board ------------------
 	
 	public void paintp(Graphics g) {
 		
@@ -219,7 +200,7 @@ public class Board extends HTMLWrapper
 		if(iId==-1) iId=0;
 		
 		try {
-			backG=(Graphics2D)getOffScreenGraphics();
+			Graphics2D backG=(Graphics2D)getOffScreenGraphics();
 			backG.setColor(new Color(0x010039));			
 			backG.fillRect(0, 0, 1220, 784);
 			backG.setColor(Color.white);
@@ -242,6 +223,8 @@ public class Board extends HTMLWrapper
 		}
 	}
 
+	// -------------  Some Helper Stuff  --------------------------
+	
 	public void ghost(Graphics2D g, int level){
 		save(g);
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,level/255.0f));
@@ -249,7 +232,18 @@ public class Board extends HTMLWrapper
 	public void noGhost(Graphics2D g){
 		restore(g);
 	}
-	
+
+	public int drawImage(Graphics2D g, Image img, int x, int y, int w) {
+		int hi=w*img.getHeight(null)/img.getWidth(null);
+		double sc=(double)w/(double)img.getWidth(null);
+		save(g);
+		g.translate(x, y);
+		g.scale(sc,sc);
+		g.drawImage(img, 0, 0,null);
+		restore(g);
+		return hi;
+	}
+
 	//Standard-Version
 	public double ease(double t, double b, double c, double d) {
 		c-=b;

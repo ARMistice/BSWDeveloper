@@ -15,35 +15,19 @@ public class Informer extends PlainInformer implements Serializable{
 	int[] punkte=new int[6];
 	
 
-	public void sendAnim(int sp, int[] anim) {
-		if(spieler[sp]!=null)
-			sendAnim(spieler[sp],anim);
-	}
-	
-	public int[] appendAnim(int[] arr, int wh, int fr1, int fr2, int to1, int to2) {
-		int[] ret;
-		int le=arr==null?0:arr.length;
-		if(arr!=null) {
-			ret=new int[arr.length+5];
-			System.arraycopy(arr,0,ret,0,arr.length);
-		} else ret=new int[5];
-		ret[le]=wh;
-		ret[le+1]=fr1;
-		ret[le+2]=fr2;
-		ret[le+3]=to1;
-		ret[le+4]=to2;
-		return ret;
-	}
-	
 	public Informer(){
 		baseInit();
 	}
 	
+	// ----------------------- Init and Starting of Game: reset() / spielStart()  
 	public void spielStart() {
 		baseInit();
-		super.spielStart();
 		
-		los();
+		phase=1;
+		currentPlayer=(currentPlayer+anzMitSpieler-1)%anzMitSpieler;
+		sendBoard();
+
+		super.spielStart();
 	}
 	
 	@Override
@@ -52,7 +36,14 @@ public class Informer extends PlainInformer implements Serializable{
 		super.reset();
 	}
 
-	// Boilerplate ends ---------------------------
+	public void baseInit(){
+		punkte=new int[4];
+		platz=new int[0];
+		score=new int[0];
+		phase=0;
+	}
+
+	// ------------- Game End ---------------------------
 	
 	
 	@Override
@@ -100,33 +91,18 @@ public class Informer extends PlainInformer implements Serializable{
 			}
 		}
 	}
-
 	
-	public void los() {
-		baseInit();
-		phase=1;
-		currentPlayer=(currentPlayer+anzMitSpieler-1)%anzMitSpieler;
-		sendBoard();
-	}
-
-	public void baseInit(){
-		punkte=new int[4];
-		platz=new int[0];
-		score=new int[0];
-		phase=0;
-	}
-	
+	// --------------- Input received from the Boards -----------------
 
 	@Override
 	public void doAnswer(int command,int pl,Data dat){
 		switch(command){
 		case 700:
-				execAction(pl,((Integer)dat.v.elementAt(0)).intValue());
-				break;
+			execAction(pl,((Integer)dat.v.elementAt(0)).intValue());
+			break;
 		}
 	}
 
-	
 	private void execAction(int curPl, int action) {
 		int act=action>>28&7;
 		if(!isRunningGame()) return;
@@ -138,6 +114,27 @@ public class Informer extends PlainInformer implements Serializable{
 		}
 	}
 
+
+	// --------------  Sending Stuff  --------------------- 
+	public void sendAnim(int sp, int[] anim) {
+		if(spieler[sp]!=null)
+			sendAnim(spieler[sp],anim);
+	}
+	
+	public int[] appendAnim(int[] arr, int wh, int fr1, int fr2, int to1, int to2) {
+		int[] ret;
+		int le=arr==null?0:arr.length;
+		if(arr!=null) {
+			ret=new int[arr.length+5];
+			System.arraycopy(arr,0,ret,0,arr.length);
+		} else ret=new int[5];
+		ret[le]=wh;
+		ret[le+1]=fr1;
+		ret[le+2]=fr2;
+		ret[le+3]=to1;
+		ret[le+4]=to2;
+		return ret;
+	}
 
 	public void sendBoard(){
 		for (GameReceiver playerInfo : getReceiverArray()) {
@@ -153,6 +150,8 @@ public class Informer extends PlainInformer implements Serializable{
 	public void sendBoard(GameReceiver st){
 		sendBoard(st,null);
 	}
+	
+	// ------------------ The informations for all the Boards connected ---------------
 	
 	public void sendBoard(GameReceiver st, int[] anim){
 		int id=st.getPlaying();
@@ -171,8 +170,6 @@ public class Informer extends PlainInformer implements Serializable{
 		st.sendDataObject(dat);
 		sendGameStatus(st);
 	}
-
-
 
 	public void sendGameStatus(GameReceiver st) {
 		Data dat=st.makeData(702,getSpielClient());
