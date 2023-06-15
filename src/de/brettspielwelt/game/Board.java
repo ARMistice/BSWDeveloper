@@ -232,9 +232,11 @@ public class Board extends HTMLWrapper
 				for(int i=0; i<anzSpieler; i++)
 					backG.drawString(spielerName[i], 10, 40+i*40);
 			
-			if(phase==1)
+			if(phase==1) {
 				backG.drawString("Running game!", 10, 40);
-				
+				backG.drawString("CurrentPlayer:"+currentPlayer, 10, 80);
+				backG.drawString("My Id:"+iAmId+" - so I am playing: "+iAmPlaying, 10, 120);
+			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
