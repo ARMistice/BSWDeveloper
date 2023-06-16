@@ -13,3 +13,5 @@ Client und Server im Package:
 in Debug-Mode:
    __de.brettspielwelt.develop.Main__
 
+## Video Tutorial
+https://youtu.be/LJ3vLDugZzE
