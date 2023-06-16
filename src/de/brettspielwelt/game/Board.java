@@ -156,33 +156,37 @@ public class Board extends HTMLWrapper
 	
 	// --------------- Mouse / Touch Actions ------------------
 	
+	int rco(int v) {   // Dummy Helper for BSWDeveloper to get real coordinates of mouse actions.
+		return v*1220/getWidth();
+	}
 	@Override
 	public void mouseMoved(MouseEvent ev) {
-		int x = ev.getX();
-		int y = ev.getY();
+		int x = rco(ev.getX());
+		int y = rco(ev.getY());
 		mouseMoveX=x; mouseMoveY=y;
 		
 		ev.consume();
 	}
 	
 	public void mouseReleased(MouseEvent ev) {
-		int x = ev.getX();
-		int y = ev.getY();
+		int x = rco(ev.getX());
+		int y = rco(ev.getY());
 	}
 	
 	public void mousePressed(MouseEvent ev) {
-		int x = ev.getX();
-		int y = ev.getY();
+		int x = rco(ev.getX());
+		int y = rco(ev.getY());
 		mouseDownX=x; mouseDownY=y;
 		
+		System.err.println(x+"+"+y);
 		repaint();
 		ev.consume();
 	}
 	
 	@Override
 	public void mouseDragged(MouseEvent ev){
-		int x = ev.getX();
-		int y = ev.getY();
+		int x = rco(ev.getX());
+		int y = rco(ev.getY());
 		mouseMoveX=x; mouseMoveY=y;
 
 		repaint();
